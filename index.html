@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Animated Landing Page</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      #scene-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 10;
+      }
+      nav ul {
+        display: flex;
+        justify-content: center;
+        list-style-type: none;
+        padding: 1rem 0;
+      }
+      nav ul li {
+        margin: 0 1rem;
+      }
+      nav ul li a {
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+      }
+      section {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.5);
+      }
+      .content {
+        text-align: center;
+      }
+      button {
+        background-color: #0066cc;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      button:hover {
+        background-color: #0052a3;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scene-container"></div>
+    <header>
+      <nav>
+        <ul>
+          <li><a href="#section1">Welcome</a></li>
+          <li><a href="#section2">Features</a></li>
+          <li><a href="#section3">Join Us</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section id="section1">
+        <div class="content">
+          <h1>Welcome to Our 3D Experience</h1>
+          <p>Scroll down to explore our amazing features</p>
+        </div>
+      </section>
+      <section id="section2">
+        <div class="content">
+          <h2>Discover Amazing Features</h2>
+          <ul>
+            <li>Interactive 3D animations</li>
+            <li>Smooth scrolling experience</li>
+            <li>Responsive design</li>
+          </ul>
+        </div>
+      </section>
+      <section id="section3">
+        <div class="content">
+          <h2>Join Our Community</h2>
+          <p>Be part of our growing network of 3D enthusiasts</p>
+          <button>Sign Up Now</button>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
