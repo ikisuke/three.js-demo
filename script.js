@@ -1,78 +1,63 @@
-let scene, camera, renderer, cube;
-let scrollY = 0;
-let targetScrollY = 0;
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-function init() {
-  // Scene setup
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.getElementById("scene-container").appendChild(renderer.domElement);
+// Set up the scene, camera, and renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-  // Create cube
-  const geometry = new THREE.BoxGeometry(2, 2, 2);
-  const material = new THREE.MeshPhongMaterial({ color: 0xff69b4 }); // Hot pink color
-  cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+// Add lights to the scene
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionalLight.position.set(0, 1, 0);
+scene.add(directionalLight);
 
-  // Add lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
-  const pointLight = new THREE.PointLight(0xffffff, 1);
-  pointLight.position.set(5, 5, 5);
-  scene.add(pointLight);
+// Set up camera position and controls
+camera.position.z = 5;
+const controls = new OrbitControls(camera, renderer.domElement);
 
-  camera.position.z = 5;
+// Load and add the GLTF model to the scene
+const loader = new GLTFLoader();
+loader.load(
+  "./Ailis_setup_2.0.glb",
+  (gltf) => {
+    scene.add(gltf.scene);
+    // Adjust the camera to fit the model
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.copy(center);
+    camera.position.z += maxDim * 2;
+    camera.lookAt(center);
+    controls.target.copy(center);
+  },
+  undefined,
+  (error) => {
+    console.error("An error occurred while loading the model:", error);
+  }
+);
 
-  // Event listeners
-  window.addEventListener("resize", onWindowResize, false);
-  window.addEventListener("scroll", onScroll, false);
-
-  // Smooth scroll
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
-      e.preventDefault();
-      document.querySelector(this.getAttribute("href")).scrollIntoView({
-        behavior: "smooth",
-      });
-    });
-  });
-
-  animate();
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
 }
+animate();
 
-function onWindowResize() {
+// Handle window resizing
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function onScroll() {
-  targetScrollY = window.scrollY;
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-
-  // Smooth scrolling effect
-  scrollY += (targetScrollY - scrollY) * 0.1;
-
-  // Animate cube based on scroll position
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  const scrollProgress = scrollY / maxScroll;
-
-  cube.rotation.x = scrollProgress * Math.PI * 2;
-  cube.rotation.y += 0.01;
-  cube.position.x = Math.sin(scrollProgress * Math.PI * 2) * 2;
-  cube.position.y = Math.cos(scrollProgress * Math.PI * 2) * 2;
-
-  renderer.render(scene, camera);
-}
-
-init();
+});

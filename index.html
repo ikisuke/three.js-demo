@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>3D Animated Landing Page</title>
@@ -10,6 +18,7 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
+        overflow-x: hidden;
       }
       #scene-container {
         position: fixed;
@@ -101,7 +110,88 @@
         </div>
       </section>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="script.js"></script>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+      // シーン、カメラ、レンダラーのセットアップ
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document
+        .getElementById("scene-container")
+        .appendChild(renderer.domElement);
+
+      // シーンに光源を追加
+      const ambientLight = new THREE.AmbientLight(0x000000, 0.5);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(0, 1, 0);
+      scene.add(directionalLight);
+
+      // カメラの位置とコントロールの設定
+      camera.position.z = 5;
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableZoom = false;
+      controls.enablePan = false;
+
+      // GLTFモデルをロードしてシーンに追加
+      let model;
+      const loader = new GLTFLoader();
+      loader.load(
+        "./Ailis_setup_2.0.glb",
+        (gltf) => {
+          model = gltf.scene;
+          scene.add(model);
+          // モデルに合わせてカメラを調整し、より近づける
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          camera.position.copy(center);
+          camera.position.z += maxDim * 1.4; // モデルをより近くに表示するために1.4に調整
+          camera.lookAt(center);
+          controls.target.copy(center);
+        },
+        undefined,
+        (error) => {
+          console.error("モデルのロード中にエラーが発生しました:", error);
+        }
+      );
+
+      // アニメーションループ
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // ウィンドウのリサイズ処理
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // スクロールに基づくモデルの回転処理
+      let scrollY = window.scrollY;
+      window.addEventListener("scroll", () => {
+        const newScrollY = window.scrollY;
+        const deltaY = newScrollY - scrollY;
+        scrollY = newScrollY;
+
+        if (model) {
+          model.rotation.y += deltaY * 0.002; // 回転速度を調整する値
+        }
+      });
+    </script>
   </body>
 </html>
